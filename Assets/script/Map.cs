@@ -20,7 +20,6 @@ public class Map : MonoBehaviour
     }
     public void CreateMap(int width, int length)
     {
-        SetMap(width * length);
         int createMapcount = 0;
         for (int i = 0;i < length; i++) {
             for (int j = 0; j < width; j++)
