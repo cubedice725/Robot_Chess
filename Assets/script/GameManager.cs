@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
 {
     Map map;
     Player player;
-    PlayerCameraControl playerCamera;
+    PlayerCamera playerCamera;
 
     void Awake()
     {
@@ -17,17 +17,22 @@ public class GameManager : MonoBehaviour
 
         // Create Player script object, Another object has a script.
         player = GameObject.Find("Player").GetComponent<Player>();
-        playerCamera = GameObject.Find("Player Camera").GetComponent<PlayerCameraControl>();
+        playerCamera = GameObject.Find("Player Camera").GetComponent<PlayerCamera>();
 
         // Create objects for scene
         map.SetMap(10000);
-        player.SetMovePlane(10);
-        playerCamera.SetCameraControl();
+        player.SetMovePlane(1000);
+        playerCamera.SetCamera();
 
         map.CreateMap(100, 100);
     }
     void Update()
     {
+        // ---------------- 마우스 위치 ----------------
+        playerCamera.CameraMove();
+
+        // ---------------- 마우스 클릭 ----------------
+
         // 왼쪽 마우스 버튼을 눌렀을 때
         if (Input.GetMouseButtonDown(0))
         {
@@ -39,24 +44,29 @@ public class GameManager : MonoBehaviour
             // ray와 닿은 물체를 확인 후 동작
             if (Physics.Raycast(ray, out hit, 1000f))
             {
-                if(hit.transform.name == "Move Plane(Clone)")
+                if(hit.transform.name == "Move Plane")
                 {
                     player.Hit = hit;
                     player.PlayerMove();
-                    print(hit.transform.name + hit.transform.position);
                 }
                 if (hit.transform.name == "Player")
                 {
-                    player.ReadyPlayerMove();
-                    print(hit.transform.name + hit.transform.position);
+                    player.ReadyPlayerMove(4);
                 }
+                print(hit.transform.name + hit.transform.position);
             }
         }
-
-        if(0f != Input.GetAxis("Mouse ScrollWheel"))
+        
+        // ---------------- 마우스 휠 ----------------
+        if (0f != Input.GetAxis("Mouse ScrollWheel"))
         {
-            playerCamera.ScrollWheel = Input.GetAxis("Mouse ScrollWheel");
             playerCamera.ZoomInOut();
+        }
+
+        // ---------------- 키보드 ---------------- 
+        if (Input.GetKeyDown("space"))
+        {
+            playerCamera.PlayerFollow(player.transform);
         }
     }
 }

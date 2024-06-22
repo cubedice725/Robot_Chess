@@ -28,19 +28,27 @@ public class Player : MonoBehaviour
         transform.position = new Vector3(hit.transform.position.x, 1, hit.transform.position.z);
     }
 
-    // Player이 선택할수 있는 움직임 판
-    public void ReadyPlayerMove()
+    // Player이 선택할수 있는 움직임 판 생성
+    public void ReadyPlayerMove(int radius)
     {
         int createMovePlanecount = 0;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if(createMovePlanecount != 4)
+        for (int i = -radius; i <= radius; i++) {
+            for (int j = -radius; j <= radius; j++) {
+                if (i != 0 || j != 0)
                 {
-                    movePlaneInstList[createMovePlanecount].transform.localPosition = new Vector3(i - 1, -0.49f, j - 1);
-                    movePlaneInstList[createMovePlanecount].SetActive(true);
+                    if (Mathf.FloorToInt(pythagoras(i,j)) <= radius)
+                    {
+                        movePlaneInstList[createMovePlanecount].transform.localPosition = new Vector3(i, -0.49f, j);
+                        movePlaneInstList[createMovePlanecount].SetActive(true);
+                        createMovePlanecount++;
+                    }
                 }
-                createMovePlanecount++;
             }
         }
+    }
+
+    private float pythagoras(int pythA, int pythB)
+    {
+        return Mathf.Sqrt((pythA * pythA) + (pythB * pythB));
     }
 }

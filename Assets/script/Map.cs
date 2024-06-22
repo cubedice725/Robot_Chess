@@ -8,7 +8,7 @@ public class Map : MonoBehaviour
 {
     public List<GameObject> mapBlockInstList;
 
-    // 멥에 사용할 블록 생성
+    // 맵에 사용할 블록 생성
     public void SetMap(int mapSetCount)
     {
         GameObject mapParent = GameObject.Find("Map");
@@ -22,7 +22,7 @@ public class Map : MonoBehaviour
         }
     }
 
-    // 실제로 멥 구현
+    // 실제로 맵 구현
     public void CreateMap(int width, int length)
     {
         int createMapcount = 0;
