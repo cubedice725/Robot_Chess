@@ -12,7 +12,7 @@ public class Map : MonoBehaviour
     public void SetMap(int mapSetCount)
     {
         GameObject mapParent = GameObject.Find("Map");
-        GameObject mapBlockPrefab = Resources.Load("Prefab/Map Block", typeof(GameObject)) as GameObject;
+        GameObject mapBlockPrefab = Resources.Load("Prefab/Map Block Black", typeof(GameObject)) as GameObject;
 
         for (int i = 0; i < mapSetCount; i++)
         {

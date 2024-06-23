@@ -25,8 +25,8 @@ public class GameManager : MonoBehaviour
         playerCamera = GameObject.Find("Player Camera").GetComponent<PlayerCamera>();
 
         // Create objects for scene
-        SetMapAndAI(10000);
-        CreateMapAndAI(100, 100);
+        SetMapAndAI(150);
+        CreateMapAndAI(10, 15);
         player.SetMovePlane(1000);
         playerCamera.SetCamera();
     }
@@ -102,11 +102,11 @@ public class GameManager : MonoBehaviour
     private void SetMapAndAI(int create)
     {
         ai.Setodb(create);
-        map.SetMap(create);
+        //map.SetMap(create);
     }
     private void CreateMapAndAI(int width, int length)
     {
-        map.CreateMap(width, length);
+        //map.CreateMap(width, length);
         ai.Width = width;
         ai.Length = length;
     }

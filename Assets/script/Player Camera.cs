@@ -107,7 +107,6 @@ public class PlayerCamera : MonoBehaviour
         //}
     }
 
-    // 플레이어 추척을 천천히 함
     private void CamFollowNull()
     {
         if (cam.Follow != null)
