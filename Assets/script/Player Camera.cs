@@ -80,6 +80,7 @@ public class PlayerCamera : MonoBehaviour
     // Ä«¸Þ¶ó ÁÜÀÎ, ÁÜ¾Æ¿ô
     public void ZoomInOut()
     {
+        CamFollowNull();
         scrollWheel = Input.GetAxis("Mouse ScrollWheel");
 
         cam.transform.Translate(0, 0, scrollWheel * Time.deltaTime * scrollSpeed);

@@ -2,6 +2,7 @@ using Cinemachine.Utility;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 public class Player : MonoBehaviour
@@ -31,17 +32,20 @@ public class Player : MonoBehaviour
     // Player이 선택할수 있는 움직임 판 생성
     public void ReadyPlayerMove(int radius)
     {
-        int createMovePlanecount = 0;
-        for (int i = -radius; i <= radius; i++) {
-            for (int j = -radius; j <= radius; j++) {
-                if (i != 0 || j != 0)
+        // 지름 계산
+        int diameter = radius * 2 + 1; 
+        for (int i = 0; i < diameter * diameter; i++)
+        {
+            // 마이너스 좌표를 위한 오차 조정
+            int width = (i % diameter) - radius;
+            int length = (i / diameter) - radius;
+
+            if (width != 0 || length != 0)
+            {
+                if (Mathf.FloorToInt(pythagoras(width, length)) <= radius)
                 {
-                    if (Mathf.FloorToInt(pythagoras(i,j)) <= radius)
-                    {
-                        movePlaneInstList[createMovePlanecount].transform.localPosition = new Vector3(i, -0.49f, j);
-                        movePlaneInstList[createMovePlanecount].SetActive(true);
-                        createMovePlanecount++;
-                    }
+                    movePlaneInstList[i].transform.localPosition = new Vector3(width, -0.49f, length);
+                    movePlaneInstList[i].SetActive(true);
                 }
             }
         }

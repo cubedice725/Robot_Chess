@@ -12,11 +12,11 @@ public class Map : MonoBehaviour
     public void SetMap(int mapSetCount)
     {
         GameObject mapParent = GameObject.Find("Map");
-        GameObject mapBlockprefab = Resources.Load("Prefab/Map Block", typeof(GameObject)) as GameObject;
+        GameObject mapBlockPrefab = Resources.Load("Prefab/Map Block", typeof(GameObject)) as GameObject;
 
         for (int i = 0; i < mapSetCount; i++)
         {
-            mapBlockInstList.Add(Instantiate(mapBlockprefab, mapParent.transform));
+            mapBlockInstList.Add(Instantiate(mapBlockPrefab, mapParent.transform));
             mapBlockInstList[i].transform.position = new Vector3(0, -100, 0);
             mapBlockInstList[i].SetActive(false);
         }
@@ -25,14 +25,10 @@ public class Map : MonoBehaviour
     // 실제로 맵 구현
     public void CreateMap(int width, int length)
     {
-        int createMapcount = 0;
-        for (int i = 0;i < length; i++) {
-            for (int j = 0; j < width; j++)
-            {
-                mapBlockInstList[createMapcount].transform.position = new Vector3(j, 0, i);
-                mapBlockInstList[createMapcount].SetActive(true);
-                createMapcount++;
-            }
+        for (int i = 0; i < width * length; i++)
+        {
+            mapBlockInstList[i].transform.position = new Vector3(i / length, 0, i % length);
+            mapBlockInstList[i].SetActive(true);
         }   
     }
 }
