@@ -1,13 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
-    AI ai;
     Map map;
+    MiniMap miniMap;
     Player player;
     PlayerCamera playerCamera;
 
@@ -16,17 +18,21 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        // Create Map script object, An object has a script.
-        map = GetComponent<Map>();
-        ai = GetComponent<AI>();
+        map = FindObjectOfType<Map>();
+        miniMap = FindObjectOfType<MiniMap>();
+        player = FindObjectOfType<Player>();
+        playerCamera = FindObjectOfType<PlayerCamera>();
 
-        // Create Player script object, Another object has a script.
-        player = GameObject.Find("Player").GetComponent<Player>();
-        playerCamera = GameObject.Find("Player Camera").GetComponent<PlayerCamera>();
-
-        // Create objects for scene
-        SetMapAndAI(150);
-        CreateMapAndAI(10, 15);
+        // 맵 생성시 필요한 정보 및 블록 생성
+        map.X = 10;
+        map.Z = 15;
+        map.SetMap();
+        
+        // 미니맵 생성시 필요한 정보 및 블록 생성
+        miniMap.Wall = 150;
+        miniMap.Monster = 1;
+        miniMap.SetMiniMap();
+        
         player.SetMovePlane(1000);
         playerCamera.SetCamera();
     }
@@ -37,7 +43,7 @@ public class GameManager : MonoBehaviour
 //////////////////////////////////////////////////////////
         if (test1)
         {
-            ai.SetCheckBox();
+            map.SetCheckBox();
             test1 = false;
             test2 = true;
         }
@@ -46,7 +52,7 @@ public class GameManager : MonoBehaviour
     {
         if (test2)
         {
-            ai.CheckBox();
+            map.CheckBox();
             test2 = false;
         }
 //////////////////////////////////////////////////////////
@@ -97,18 +103,6 @@ public class GameManager : MonoBehaviour
         {
             playerCamera.PlayerFollow(player.transform);
         }
-    }
-
-    private void SetMapAndAI(int create)
-    {
-        ai.Setodb(create);
-        //map.SetMap(create);
-    }
-    private void CreateMapAndAI(int width, int length)
-    {
-        //map.CreateMap(width, length);
-        ai.Width = width;
-        ai.Length = length;
     }
 }
 
