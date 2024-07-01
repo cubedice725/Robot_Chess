@@ -26,6 +26,7 @@ public class Player : MonoBehaviour
     // Player가 실제로 움직임
     public void PlayerMove()
     {
+
         transform.position = new Vector3(hit.transform.position.x, 1, hit.transform.position.z);
     }
 

@@ -63,7 +63,7 @@ public class MiniMap : MonoBehaviour
 
         for (int i = 0; i < gameSupporter.MapX * gameSupporter.MapZ; i++)
         {
-            int objactNum = gameSupporter.map2D[i / gameSupporter.MapZ][i % gameSupporter.MapZ];
+            int objactNum = gameSupporter.Map2D[i / gameSupporter.MapZ, i % gameSupporter.MapZ];
             if (objactNum == (int)GameSupporter.map2dObject.wall)
             {
                 wallPlanePrefabList[wallPlanCount].transform.localPosition = new Vector3(i / gameSupporter.MapZ + 0.5f, 1, i % gameSupporter.MapZ + 0.5f);

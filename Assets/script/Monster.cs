@@ -22,8 +22,7 @@ public class Monster : AStar
     public virtual void Move()
     {
         PathFinding();
-        print(FinalNodeList.Count);
-        if (FinalNodeList.Count < AttackDistance + 2)
+        if (FinalNodeList.Count < AttackDistance + 3)
         {
             attack();
         }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
+using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -20,7 +21,7 @@ public class Map : MonoBehaviour
     public void SetMap()
     {
         gameSupporter = FindObjectOfType<GameSupporter>();
-        miniMap = FindObjectOfType<MiniMap>();
+        miniMap = FindObjectOfType<MiniMap>(); 
 
         GameObject mapParent = GameObject.Find("Map");
         GameObject odbParent = GameObject.Find("Object Detection Box");
@@ -38,15 +39,8 @@ public class Map : MonoBehaviour
             mapBlockInstList.Add(Instantiate(mapBlockPrefab, new Vector3(0, -100, 0), Quaternion.Euler(Vector3.zero), mapParent.transform));
             mapBlockInstList[i].SetActive(false);
         }
-        // 2차원 배열 생성
-        for (int i = 0; i < gameSupporter.MapX * gameSupporter.MapZ; i++)
-        {
-            if (i % gameSupporter.MapZ == 0)
-            {
-                gameSupporter.map2D.Add(new List<int>());
-            }
-            gameSupporter.map2D[i / gameSupporter.MapZ].Add((int)GameSupporter.map2dObject.noting);
-        }
+        
+        gameSupporter.Map2D = new int[gameSupporter.MapX, gameSupporter.MapZ];
     }
 
     // 실제로 맵 구현
@@ -65,7 +59,7 @@ public class Map : MonoBehaviour
         // 0으로 초기화
         for (int i = 0; i < gameSupporter.MapX * gameSupporter.MapZ; i++)
         {
-            gameSupporter.map2D[i / gameSupporter.MapZ][i % gameSupporter.MapZ] = (int)GameSupporter.map2dObject.noting;
+            gameSupporter.Map2D[i / gameSupporter.MapZ, i % gameSupporter.MapZ] = (int)GameSupporter.map2dObject.noting;
         }
         // 2차원 데이터로 변환
         for (int i = 0; i < gameSupporter.MapX * gameSupporter.MapZ; i++)
@@ -75,19 +69,19 @@ public class Map : MonoBehaviour
             {
                 if (boxC.transform.name.StartsWith("Map Block"))
                 {
-                    gameSupporter.map2D[i / gameSupporter.MapZ][i % gameSupporter.MapZ] = (int)GameSupporter.map2dObject.wall;
+                    gameSupporter.Map2D[i / gameSupporter.MapZ, i % gameSupporter.MapZ] = (int)GameSupporter.map2dObject.wall;
                 }
                 else if (boxC.transform.name == "Monster")
                 {
-                    gameSupporter.map2D[i / gameSupporter.MapZ][i % gameSupporter.MapZ] = (int)GameSupporter.map2dObject.moster;
+                    gameSupporter.Map2D[i / gameSupporter.MapZ, i % gameSupporter.MapZ] = (int)GameSupporter.map2dObject.moster;
                 }
                 else if (boxC.transform.name == "Player")
                 {
-                    gameSupporter.map2D[i / gameSupporter.MapZ][i % gameSupporter.MapZ] = (int)GameSupporter.map2dObject.player;
+                    gameSupporter.Map2D[i / gameSupporter.MapZ, i % gameSupporter.MapZ] = (int)GameSupporter.map2dObject.player;
                 }
                 else
                 {
-                    gameSupporter.map2D[i / gameSupporter.MapZ][i % gameSupporter.MapZ] = (int)GameSupporter.map2dObject.noting;
+                    gameSupporter.Map2D[i / gameSupporter.MapZ, i % gameSupporter.MapZ] = (int)GameSupporter.map2dObject.noting;
                 }
                 odbList[i].GetComponent<ObjectDetectionBox>().Box = null;
             }
@@ -107,7 +101,7 @@ public class Map : MonoBehaviour
         //잘 들어갔는지 확인
         //for (int i = 0; i < gameSupporter.MapX * gameSupporter.MapZ; i++)
         //{
-        //    print(i / gameSupporter.MapZ + "," + i % gameSupporter.MapZ + ":" + gameSupporter.map2D[i / gameSupporter.MapZ][i % gameSupporter.MapZ]);
+        //    print(i / gameSupporter.MapZ + "," + i % gameSupporter.MapZ + ":" + gameSupporter.Map2D[i / gameSupporter.MapZ, i % gameSupporter.MapZ]);
         //}
     }
     // CheckBox를 생성하여 확인할 준비를 함
@@ -120,4 +114,5 @@ public class Map : MonoBehaviour
             odbList[i].SetActive(true);
         }
     }
+    
 }
