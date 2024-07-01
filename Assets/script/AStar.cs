@@ -4,75 +4,69 @@ using System.Threading;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
-
-[System.Serializable]
 public class Node
 {
-    public Node(bool _isWall, int _x, int _y) { isWall = _isWall; x = _x; y = _y; }
+    public Node(bool _isWall, int _x, int _z) { isWall = _isWall; x = _x; z = _z; }
 
     public bool isWall;
     public Node ParentNode;
 
     // G : 시작으로부터 이동했던 거리, H : |가로|+|세로| 장애물 무시하여 목표까지의 거리, F : G + H
-    public int x, y, G, H;
+    public int x, z, G, H;
     public int F { get { return G + H; } }
 }
 
-
 public class AStar : MonoBehaviour
 {
-    public Vector2Int bottomLeft, topRight, startPos, targetPos;
-    public List<Node> FinalNodeList;
-    public bool allowDiagonal, dontCrossCorner;
+    protected Vector3Int bottomLeft, topRight, startPos, targetPos;
+    protected List<Node> FinalNodeList;
+    protected bool allowDiagonal = true, dontCrossCorner = true;
 
-    int sizeX, sizeY;
+    int sizeX, sizeZ;
     Node[,] NodeArray;
     Node StartNode, TargetNode, CurNode;
     List<Node> OpenList, ClosedList;
 
     GameSupporter gameSupporter;
     Player player;
-    Monster monster;
 
     public void SetAStar()
     {
         gameSupporter = FindObjectOfType<GameSupporter>();
-        monster = FindObjectOfType<Monster>();
         player = FindObjectOfType<Player>();
     }
     public void PathFinding()
     {
-        bottomLeft.x = 0; 
-        bottomLeft.y = 0;
+        bottomLeft = Vector3Int.zero;
 
-        topRight.x = gameSupporter.Width;
-        topRight.y = gameSupporter.Length;
+        topRight = new Vector3Int(gameSupporter.MapX, 0, gameSupporter.MapZ);
 
-        targetPos.x = (int)player.transform.position.x;
-        targetPos.y = (int)player.transform.position.z;
+        startPos = new Vector3Int((int)transform.position.x, (int)transform.position.y, (int)transform.position.z);
 
-        // NodeArray의 크기 정해주고, isWall, x, y 대입
-        sizeX = topRight.x - bottomLeft.x + 1;
-        sizeY = topRight.y - bottomLeft.y + 1;
-        NodeArray = new Node[sizeX, sizeY];
+        targetPos = new Vector3Int((int)player.transform.position.x, (int)player.transform.position.y, (int)player.transform.position.z);
+
+        // NodeArray의 크기 정해주고, isWall, x, z 대입
+        sizeX = topRight.x - bottomLeft.x;
+        sizeZ = topRight.z - bottomLeft.z;
+        NodeArray = new Node[sizeX, sizeZ];
 
         for (int i = 0; i < sizeX; i++)
         {
-            for (int j = 0; j < sizeY; j++)
+            for (int j = 0; j < sizeZ; j++)
             {
                 bool isWall = false;
-                if ((int)GameSupporter.map2dObject.noting != gameSupporter.map2D[i][j])
+                if ((int)GameSupporter.map2dObject.wall == gameSupporter.map2D[i][j])
                 {
                     isWall = true;
                 }
-                NodeArray[i, j] = new Node(isWall, i + bottomLeft.x, j + bottomLeft.y);
+                NodeArray[i, j] = new Node(isWall, i + bottomLeft.x, j + bottomLeft.z);
             }
         }
 
 
         // 시작과 끝 노드, 열린리스트와 닫힌리스트, 마지막리스트 초기화
-        StartNode = NodeArray[startPos.x - bottomLeft.x, startPos.y - bottomLeft.y];
-        TargetNode = NodeArray[targetPos.x - bottomLeft.x, targetPos.y - bottomLeft.y];
+        StartNode = NodeArray[startPos.x - bottomLeft.x, startPos.z - bottomLeft.z];
+        TargetNode = NodeArray[targetPos.x - bottomLeft.x, targetPos.z - bottomLeft.z];
 
         OpenList = new List<Node>() { StartNode };
         ClosedList = new List<Node>();
@@ -103,37 +97,35 @@ public class AStar : MonoBehaviour
                 FinalNodeList.Add(StartNode);
                 FinalNodeList.Reverse();
 
-                for (int i = 0; i < FinalNodeList.Count; i++) print(i + "번째는 " + FinalNodeList[i].x + ", " + FinalNodeList[i].y);
                 return;
             }
-
 
             // ↗↖↙↘
             if (allowDiagonal)
             {
-                OpenListAdd(CurNode.x + 1, CurNode.y + 1);
-                OpenListAdd(CurNode.x - 1, CurNode.y + 1);
-                OpenListAdd(CurNode.x - 1, CurNode.y - 1);
-                OpenListAdd(CurNode.x + 1, CurNode.y - 1);
+                OpenListAdd(CurNode.x + 1, CurNode.z + 1);
+                OpenListAdd(CurNode.x - 1, CurNode.z + 1);
+                OpenListAdd(CurNode.x - 1, CurNode.z - 1);
+                OpenListAdd(CurNode.x + 1, CurNode.z - 1);
             }
 
             // ↑ → ↓ ←
-            OpenListAdd(CurNode.x, CurNode.y + 1);
-            OpenListAdd(CurNode.x + 1, CurNode.y);
-            OpenListAdd(CurNode.x, CurNode.y - 1);
-            OpenListAdd(CurNode.x - 1, CurNode.y);
+            OpenListAdd(CurNode.x, CurNode.z + 1);
+            OpenListAdd(CurNode.x + 1, CurNode.z);
+            OpenListAdd(CurNode.x, CurNode.z - 1);
+            OpenListAdd(CurNode.x - 1, CurNode.z);
         }
     }
 
-    void OpenListAdd(int checkX, int checkY)
+    void OpenListAdd(int checkX, int checkZ)
     {
         // 상하좌우 범위를 벗어나지 않고, 벽이 아니면서, 닫힌리스트에 없다면
-        if (checkX >= bottomLeft.x && checkX < topRight.x + 1 && checkY >= bottomLeft.y && checkY < topRight.y + 1 && !NodeArray[checkX - bottomLeft.x, checkY - bottomLeft.y].isWall && !ClosedList.Contains(NodeArray[checkX - bottomLeft.x, checkY - bottomLeft.y]))
+        if (checkX >= bottomLeft.x && checkX < topRight.x + 1 && checkZ >= bottomLeft.z && checkZ < topRight.z + 1 && !NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z].isWall && !ClosedList.Contains(NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z]))
         {
             // 대각선 허용시, 벽 사이로 통과 안됨
             if (allowDiagonal)
             {
-                if (NodeArray[CurNode.x - bottomLeft.x, checkY - bottomLeft.y].isWall && NodeArray[checkX - bottomLeft.x, CurNode.y - bottomLeft.y].isWall)
+                if (NodeArray[CurNode.x - bottomLeft.x, checkZ - bottomLeft.z].isWall && NodeArray[checkX - bottomLeft.x, CurNode.z - bottomLeft.z].isWall)
                 {
                     return;
                 }
@@ -142,21 +134,21 @@ public class AStar : MonoBehaviour
             // 코너를 가로질러 가지 않을시, 이동 중에 수직수평 장애물이 있으면 안됨
             if (dontCrossCorner)
             {
-                if (NodeArray[CurNode.x - bottomLeft.x, checkY - bottomLeft.y].isWall || NodeArray[checkX - bottomLeft.x, CurNode.y - bottomLeft.y].isWall)
+                if (NodeArray[CurNode.x - bottomLeft.x, checkZ - bottomLeft.z].isWall || NodeArray[checkX - bottomLeft.x, CurNode.z - bottomLeft.z].isWall)
                 {
                     return;
                 }
             }
 
             // 이웃노드에 넣고, 직선은 10, 대각선은 14비용
-            Node NeighborNode = NodeArray[checkX - bottomLeft.x, checkY - bottomLeft.y];
-            int MoveCost = CurNode.G + (CurNode.x - checkX == 0 || CurNode.y - checkY == 0 ? 10 : 14);
+            Node NeighborNode = NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z];
+            int MoveCost = CurNode.G + (CurNode.x - checkX == 0 || CurNode.z - checkZ == 0 ? 10 : 14);
 
             // 이동비용이 이웃노드G보다 작거나 또는 열린리스트에 이웃노드가 없다면 G, H, ParentNode를 설정 후 열린리스트에 추가
             if (MoveCost < NeighborNode.G || !OpenList.Contains(NeighborNode))
             {
                 NeighborNode.G = MoveCost;
-                NeighborNode.H = (Mathf.Abs(NeighborNode.x - TargetNode.x) + Mathf.Abs(NeighborNode.y - TargetNode.y)) * 10;
+                NeighborNode.H = (Mathf.Abs(NeighborNode.x - TargetNode.x) + Mathf.Abs(NeighborNode.z - TargetNode.z)) * 10;
                 NeighborNode.ParentNode = CurNode;
 
                 OpenList.Add(NeighborNode);

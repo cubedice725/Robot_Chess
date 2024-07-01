@@ -61,26 +61,26 @@ public class MiniMap : MonoBehaviour
         }
         mosterCount = 0;
 
-        for (int i = 0; i < gameSupporter.Width * gameSupporter.Length; i++)
+        for (int i = 0; i < gameSupporter.MapX * gameSupporter.MapZ; i++)
         {
-            int objactNum = gameSupporter.map2D[i / gameSupporter.Length][i % gameSupporter.Length];
+            int objactNum = gameSupporter.map2D[i / gameSupporter.MapZ][i % gameSupporter.MapZ];
             if (objactNum == (int)GameSupporter.map2dObject.wall)
             {
-                wallPlanePrefabList[wallPlanCount].transform.localPosition = new Vector3(i / gameSupporter.Length + 0.5f, 1, i % gameSupporter.Length + 0.5f);
+                wallPlanePrefabList[wallPlanCount].transform.localPosition = new Vector3(i / gameSupporter.MapZ + 0.5f, 1, i % gameSupporter.MapZ + 0.5f);
                 wallPlanePrefabList[wallPlanCount].SetActive(true);
 
                 wallPlanCount++;
             }
             else if (objactNum == (int)GameSupporter.map2dObject.moster)
             {
-                monsterPlanePrefabList[mosterCount].transform.localPosition = new Vector3(i / gameSupporter.Length + 0.5f, 1, i % gameSupporter.Length + 0.5f);
+                monsterPlanePrefabList[mosterCount].transform.localPosition = new Vector3(i / gameSupporter.MapZ + 0.5f, 1, i % gameSupporter.MapZ + 0.5f);
                 monsterPlanePrefabList[mosterCount].SetActive(true);
 
                 mosterCount++;
             }
             else if (objactNum == (int)GameSupporter.map2dObject.player)
             {
-                PlayerPlane.transform.localPosition = new Vector3(i / gameSupporter.Length + 0.5f, 1, i % gameSupporter.Length + 0.5f);
+                PlayerPlane.transform.localPosition = new Vector3(i / gameSupporter.MapZ + 0.5f, 1, i % gameSupporter.MapZ + 0.5f);
             }
             else if (objactNum == (int)GameSupporter.map2dObject.noting)
             {

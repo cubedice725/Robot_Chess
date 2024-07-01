@@ -10,8 +10,8 @@ public class GameSupporter : MonoBehaviour
     private int m_width;
     private int m_length;
 
-    public int Width { get { return m_width; } set { m_width = value; } } // X
-    public int Length { get { return m_length; } set { m_length = value; } } // Z
+    public int MapX { get { return m_width; } set { m_width = value; } }
+    public int MapZ { get { return m_length; } set { m_length = value; } }
 
     public enum map2dObject
     { 

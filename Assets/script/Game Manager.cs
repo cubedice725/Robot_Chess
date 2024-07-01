@@ -14,11 +14,10 @@ public class GameManager : MonoBehaviour
     Player player;
     PlayerCamera playerCamera;
     GameSupporter gameSupporter;
-    AStar aStar;
     Monster monster;
 
     bool fixedEnd = false;
-    bool updateEnd = false;
+    bool updateEnd = true;
 
     void Awake()
     {
@@ -28,12 +27,11 @@ public class GameManager : MonoBehaviour
         player = FindObjectOfType<Player>();
         playerCamera = FindObjectOfType<PlayerCamera>();
         gameSupporter = FindObjectOfType<GameSupporter>();
-        aStar = FindObjectOfType<AStar>();
         monster = FindObjectOfType<Monster>();
 
         // 컴포넌트 Set전 필요한 정보 미리 삽입
-        gameSupporter.Width = 100;
-        gameSupporter.Length = 100;
+        gameSupporter.MapX = 10;
+        gameSupporter.MapZ = 15;
         miniMap.Wall = 150;
         miniMap.Monster = 1;
 
@@ -42,8 +40,7 @@ public class GameManager : MonoBehaviour
         miniMap.SetMiniMap();
         player.SetMovePlane(1000);
         playerCamera.SetCamera();
-        aStar.SetAStar();
-        monster.SetMoster();
+        monster.SetMonster();
     }
     void FixedUpdate()
     {
@@ -59,9 +56,10 @@ public class GameManager : MonoBehaviour
         if (fixedEnd)
         {
             map.CheckBox();
+            monster.Move();
             fixedEnd = false;
         }
-
+        
         // ---------------- 마우스 클릭 ----------------
 
         // 왼쪽 마우스 버튼을 눌렀을 때
@@ -92,7 +90,7 @@ public class GameManager : MonoBehaviour
         // 오른쪽 마우스 버튼을 눌렀을 때
         if (Input.GetMouseButtonDown(1))
         {
-            
+            monster.Move();
         }
 
         // ---------------- 키보드 ---------------- 
