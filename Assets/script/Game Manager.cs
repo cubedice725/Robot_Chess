@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -12,53 +13,54 @@ public class GameManager : MonoBehaviour
     MiniMap miniMap;
     Player player;
     PlayerCamera playerCamera;
+    GameSupporter gameSupporter;
+    AStar aStar;
+    Monster monster;
 
-    bool test1 = false;
-    bool test2 = false;
+    bool fixedEnd = false;
+    bool updateEnd = false;
 
     void Awake()
     {
+        // 필요한 컴포넌트 생성
         map = FindObjectOfType<Map>();
         miniMap = FindObjectOfType<MiniMap>();
         player = FindObjectOfType<Player>();
         playerCamera = FindObjectOfType<PlayerCamera>();
+        gameSupporter = FindObjectOfType<GameSupporter>();
+        aStar = FindObjectOfType<AStar>();
+        monster = FindObjectOfType<Monster>();
 
-        // 맵 생성시 필요한 정보 및 블록 생성
-        map.X = 10;
-        map.Z = 15;
-        map.SetMap();
-        
-        // 미니맵 생성시 필요한 정보 및 블록 생성
+        // 컴포넌트 Set전 필요한 정보 미리 삽입
+        gameSupporter.Width = 100;
+        gameSupporter.Length = 100;
         miniMap.Wall = 150;
         miniMap.Monster = 1;
+
+        // 게임에 필요한 Object생성 혹은 설정
+        map.SetMap();
         miniMap.SetMiniMap();
-        
         player.SetMovePlane(1000);
         playerCamera.SetCamera();
+        aStar.SetAStar();
+        monster.SetMoster();
     }
     void FixedUpdate()
     {
-//////////////////////////////////////////////////////////
-////////////////////나중에 꼭 수정해야함////////////////////
-//////////////////////////////////////////////////////////
-        if (test1)
+        if (updateEnd)
         {
             map.SetCheckBox();
-            test1 = false;
-            test2 = true;
+            updateEnd = false;
+            fixedEnd = true;
         }
     }
     void Update()
     {
-        if (test2)
+        if (fixedEnd)
         {
             map.CheckBox();
-            test2 = false;
+            fixedEnd = false;
         }
-//////////////////////////////////////////////////////////
-
-        // ---------------- 마우스 위치 ----------------
-        playerCamera.CameraMove();
 
         // ---------------- 마우스 클릭 ----------------
 
@@ -77,25 +79,20 @@ public class GameManager : MonoBehaviour
                 {
                     player.Hit = hit;
                     player.PlayerMove();
+                    updateEnd = true;
                 }
                 if (hit.transform.name == "Player")
                 {
                     player.ReadyPlayerMove(4);
                 }
-                print(hit.transform.name + hit.transform.position);
+                //print(hit.transform.name + hit.transform.position);
             }
         }
-
+        
         // 오른쪽 마우스 버튼을 눌렀을 때
         if (Input.GetMouseButtonDown(1))
         {
-            test1 = true;
-        }
-
-        // ---------------- 마우스 휠 ----------------
-        if (0f != Input.GetAxis("Mouse ScrollWheel"))
-        {
-            playerCamera.ZoomInOut();
+            
         }
 
         // ---------------- 키보드 ---------------- 
@@ -104,5 +101,17 @@ public class GameManager : MonoBehaviour
             playerCamera.PlayerFollow(player.transform);
         }
     }
+    void LateUpdate()
+    {
+        // ---------------- 마우스 위치 ----------------
+        playerCamera.CameraMove();
+
+        // ---------------- 마우스 휠 ----------------
+        if (0f != Input.GetAxis("Mouse ScrollWheel"))
+        {
+            playerCamera.ZoomInOut();
+        }
+    }
+
 }
 

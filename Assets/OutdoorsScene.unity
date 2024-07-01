@@ -1042,7 +1042,7 @@ MonoBehaviour:
     FieldOfView: 60.000004
     OrthographicSize: 10
     NearClipPlane: 0.1
-    FarClipPlane: 1000
+    FarClipPlane: 50
     Dutch: 0
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
@@ -1109,6 +1109,57 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81bb91967d75f01488a09bc9bbbd0811, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &765422891
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 765422893}
+  - component: {fileID: 765422892}
+  m_Layer: 0
+  m_Name: AStar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &765422892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 765422891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6db8fb2c6d16daf469f6d877ad6465fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bottomLeft: {x: 0, y: 0}
+  topRight: {x: 0, y: 0}
+  startPos: {x: 0, y: 0}
+  targetPos: {x: 0, y: 0}
+  FinalNodeList: []
+  allowDiagonal: 0
+  dontCrossCorner: 0
+--- !u!4 &765422893
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 765422891}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 6.749373, y: 2.1294363, z: 3.2622306}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &804797705 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2053506447694553009, guid: 94837f2b049eba8478ffdec3f9d57be7,
@@ -1296,8 +1347,8 @@ Transform:
   m_GameObject: {fileID: 891648974}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5, y: 0, z: 5}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 25, y: 0, z: 25}
+  m_LocalScale: {x: 5, y: 1, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1838618915}
@@ -1629,7 +1680,7 @@ Camera:
   far clip plane: 10
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 20
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -1654,11 +1705,11 @@ Transform:
   m_GameObject: {fileID: 926986814}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 55, y: 5, z: 55}
+  m_LocalPosition: {x: 20, y: 5, z: 20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1838618915}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!1001 &984001374
 PrefabInstance:
@@ -2688,7 +2739,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.1
-  far clip plane: 1000
+  far clip plane: 50
   field of view: 60.000004
   orthographic: 0
   orthographic size: 10
@@ -2911,11 +2962,12 @@ Transform:
   m_GameObject: {fileID: 1838618914}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 50, y: 0, z: 50}
+  m_LocalPosition: {x: 500, y: 0, z: 500}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 891648975}
+  - {fileID: 926986818}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1838618916
@@ -2930,6 +2982,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35de2fe74d292ea459c6f566cc527e0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  wallPlanePrefab: {fileID: 0}
+  playerPlanePrefab: {fileID: 0}
+  monsterPlanePrefab: {fileID: 0}
+  wallPlanePrefabList: []
+  monsterPlanePrefabList: []
+  PlayerPlane: {fileID: 0}
 --- !u!4 &1879323493 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2053506447694553009, guid: 94837f2b049eba8478ffdec3f9d57be7,
@@ -3364,4 +3422,4 @@ SceneRoots:
   - {fileID: 78643186}
   - {fileID: 986369482}
   - {fileID: 1838618915}
-  - {fileID: 926986818}
+  - {fileID: 765422893}

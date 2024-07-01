@@ -48,7 +48,7 @@ public class MiniMap : MonoBehaviour
         }
         PlayerPlane = Instantiate(playerPlanePrefab, new Vector3(0, -100, 0), Quaternion.Euler(Vector3.zero), miniMapParent.transform);
     }
-    public void UpdateMiniMap(int m_width, int m_length)
+    public void UpdateMiniMap()
     {
         for (int i = 0; i < wallPlanCount; i++) { 
             wallPlanePrefabList[i].SetActive(false);
@@ -61,26 +61,26 @@ public class MiniMap : MonoBehaviour
         }
         mosterCount = 0;
 
-        for (int i = 0; i < m_width * m_length; i++)
+        for (int i = 0; i < gameSupporter.Width * gameSupporter.Length; i++)
         {
-            int objactNum = gameSupporter.map2D[i / m_length][i % m_length];
+            int objactNum = gameSupporter.map2D[i / gameSupporter.Length][i % gameSupporter.Length];
             if (objactNum == (int)GameSupporter.map2dObject.wall)
             {
-                wallPlanePrefabList[wallPlanCount].transform.localPosition = new Vector3(i / m_length + 0.5f, 1, i % m_length + 0.5f);
+                wallPlanePrefabList[wallPlanCount].transform.localPosition = new Vector3(i / gameSupporter.Length + 0.5f, 1, i % gameSupporter.Length + 0.5f);
                 wallPlanePrefabList[wallPlanCount].SetActive(true);
 
                 wallPlanCount++;
             }
             else if (objactNum == (int)GameSupporter.map2dObject.moster)
             {
-                monsterPlanePrefabList[mosterCount].transform.localPosition = new Vector3(i / m_length + 0.5f, 1, i % m_length + 0.5f);
+                monsterPlanePrefabList[mosterCount].transform.localPosition = new Vector3(i / gameSupporter.Length + 0.5f, 1, i % gameSupporter.Length + 0.5f);
                 monsterPlanePrefabList[mosterCount].SetActive(true);
 
                 mosterCount++;
             }
             else if (objactNum == (int)GameSupporter.map2dObject.player)
             {
-                PlayerPlane.transform.localPosition = new Vector3(i / m_length + 0.5f, 1, i % m_length + 0.5f);
+                PlayerPlane.transform.localPosition = new Vector3(i / gameSupporter.Length + 0.5f, 1, i % gameSupporter.Length + 0.5f);
             }
             else if (objactNum == (int)GameSupporter.map2dObject.noting)
             {
