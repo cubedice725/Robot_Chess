@@ -6,17 +6,18 @@ using UnityEngine;
 
 public class AStar : MonoBehaviour
 {
-    protected Vector3Int bottomLeft, topRight, startPos, targetPos;
+    protected GameSupporter gameSupporter;
+    protected Player player;
+    protected Node[,] NodeArray;
+    protected Node StartNode, TargetNode, CurNode;
+
     protected List<Node> FinalNodeList;
-    protected bool allowDiagonal = true, dontCrossCorner = true;
+    protected List<Node> OpenList, ClosedList;
 
-    int sizeX, sizeZ;
-    Node[,] NodeArray;
-    Node StartNode, TargetNode, CurNode;
-    List<Node> OpenList, ClosedList;
-
-    GameSupporter gameSupporter;
-    Player player;
+    protected bool allowDiagonal = true;
+    protected bool dontCrossCorner = true;
+    protected int sizeX, sizeZ;
+    protected Vector3Int bottomLeft, topRight, startPos, targetPos;
 
     public void SetAStar()
     {
@@ -38,19 +39,15 @@ public class AStar : MonoBehaviour
         sizeZ = topRight.z - bottomLeft.z;
         NodeArray = new Node[sizeX, sizeZ];
 
-        for (int i = 0; i < sizeX; i++)
+        for (int i = 0; i < sizeX * sizeZ; i++)
         {
-            for (int j = 0; j < sizeZ; j++)
+            bool isWall = false;
+            if ((int)GameSupporter.map2dObject.wall == gameSupporter.Map2D[i / sizeZ, i % sizeZ])
             {
-                bool isWall = false;
-                if ((int)GameSupporter.map2dObject.wall == gameSupporter.Map2D[i,j])
-                {
-                    isWall = true;
-                }
-                NodeArray[i, j] = new Node(isWall, i + bottomLeft.x, j + bottomLeft.z);
+                isWall = true;
             }
+            NodeArray[i / sizeZ, i % sizeZ] = new Node(isWall, (i / sizeZ) + bottomLeft.x, (i % sizeZ) + bottomLeft.z);
         }
-
 
         // 시작과 끝 노드, 열린리스트와 닫힌리스트, 마지막리스트 초기화
         StartNode = NodeArray[startPos.x - bottomLeft.x, startPos.z - bottomLeft.z];
@@ -105,7 +102,7 @@ public class AStar : MonoBehaviour
         }
     }
 
-    void OpenListAdd(int checkX, int checkZ)
+    protected void OpenListAdd(int checkX, int checkZ)
     {
         // 상하좌우 범위를 벗어나지 않고, 벽이 아니면서, 닫힌리스트에 없다면
         if (checkX >= bottomLeft.x && checkX < topRight.x + 1 && checkZ >= bottomLeft.z && checkZ < topRight.z + 1 && !NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z].isWall && !ClosedList.Contains(NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z]))

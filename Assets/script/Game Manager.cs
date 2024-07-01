@@ -9,55 +9,55 @@ using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
-    Map map;
-    MiniMap miniMap;
-    Player player;
-    PlayerCamera playerCamera;
-    GameSupporter gameSupporter;
-    Monster monster;
+    protected Map map;
+    protected Player player;
+    protected Monster monster;
+    protected MiniMap miniMap;
+    protected PlayerCamera playerCamera;
+    protected GameSupporter gameSupporter;
 
-    bool fixedEnd = false;
-    bool updateEnd = true;
+    private bool MapCheck = true;
+    private bool turnEnd = true;
 
-    void Awake()
+    private void Awake()
     {
         // 필요한 컴포넌트 생성
         map = FindObjectOfType<Map>();
-        miniMap = FindObjectOfType<MiniMap>();
         player = FindObjectOfType<Player>();
+        monster = FindObjectOfType<Monster>();
+        miniMap = FindObjectOfType<MiniMap>();
         playerCamera = FindObjectOfType<PlayerCamera>();
         gameSupporter = FindObjectOfType<GameSupporter>();
-        monster = FindObjectOfType<Monster>();
 
         // 컴포넌트 Set전 필요한 정보 미리 삽입
-        gameSupporter.MapX = 10;
-        gameSupporter.MapZ = 15;
         miniMap.Wall = 150;
         miniMap.Monster = 1;
+        gameSupporter.MapX = 10;
+        gameSupporter.MapZ = 15;
 
         // 게임에 필요한 Object생성 혹은 설정
         map.SetMap();
-        miniMap.SetMiniMap();
-        player.SetMovePlane(1000);
-        playerCamera.SetCamera();
+        map.SetCheckBox();
         monster.SetMonster();
+        miniMap.SetMiniMap();
+        player.SetPlayer(1000);
+        playerCamera.SetCamera();
     }
-    void FixedUpdate()
+    private void Update()
     {
-        if (updateEnd)
-        {
-            map.SetCheckBox();
-            updateEnd = false;
-            fixedEnd = true;
-        }
-    }
-    void Update()
-    {
-        if (fixedEnd)
+        //맵을 탐색 한번만 작동
+        if (MapCheck)
         {
             map.CheckBox();
+            MapCheck = false;
+        }
+
+        // 한턴이 끝나면 실행
+        if (turnEnd)
+        {
+            miniMap.UpdateMiniMap();
             monster.Move();
-            fixedEnd = false;
+            turnEnd = false;
         }
         
         // ---------------- 마우스 클릭 ----------------
@@ -77,7 +77,7 @@ public class GameManager : MonoBehaviour
                 {
                     player.Hit = hit;
                     player.PlayerMove();
-                    updateEnd = true;
+                    turnEnd = true;
                 }
                 if (hit.transform.name == "Player")
                 {
@@ -99,7 +99,7 @@ public class GameManager : MonoBehaviour
             playerCamera.PlayerFollow(player.transform);
         }
     }
-    void LateUpdate()
+    private void LateUpdate()
     {
         // ---------------- 마우스 위치 ----------------
         playerCamera.CameraMove();

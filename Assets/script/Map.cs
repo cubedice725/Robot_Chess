@@ -10,47 +10,28 @@ using UnityEngine.UIElements;
 
 public class Map : MonoBehaviour
 {
-    MiniMap miniMap;
-    GameSupporter gameSupporter;
+    protected GameSupporter gameSupporter;
+    protected GameObject odbParent;
+    protected GameObject odbPrefab;
 
     // odb: object Detection Box
-    public List<GameObject> odbList;
-    public List<GameObject> mapBlockInstList;
-
+    protected List<GameObject> odbList = new List<GameObject>();
+    
     // 맵에 사용할 블록 생성
     public void SetMap()
     {
+        // 필요한 컴포넌트, 프리펩 생성
         gameSupporter = FindObjectOfType<GameSupporter>();
-        miniMap = FindObjectOfType<MiniMap>(); 
+        odbParent = GameObject.Find("Object Detection Box");
+        odbPrefab = Resources.Load("Prefab/Object Detection Box", typeof(GameObject)) as GameObject;
 
-        GameObject mapParent = GameObject.Find("Map");
-        GameObject odbParent = GameObject.Find("Object Detection Box");
-
-        GameObject odbPrefab = Resources.Load("Prefab/Object Detection Box", typeof(GameObject)) as GameObject;
-        GameObject mapBlockPrefab = Resources.Load("Prefab/Map Block Black", typeof(GameObject)) as GameObject;
-
+        // object Detection Box 맵 크기만큼 생성
         for (int i = 0; i < gameSupporter.MapX * gameSupporter.MapZ; i++)
         {
             odbList.Add(Instantiate(odbPrefab, new Vector3(0, -100, 0), Quaternion.Euler(Vector3.zero), odbParent.transform));
             odbList[i].SetActive(false);
         }
-        for (int i = 0; i < gameSupporter.MapX * gameSupporter.MapZ; i++)
-        {
-            mapBlockInstList.Add(Instantiate(mapBlockPrefab, new Vector3(0, -100, 0), Quaternion.Euler(Vector3.zero), mapParent.transform));
-            mapBlockInstList[i].SetActive(false);
-        }
-        
         gameSupporter.Map2D = new int[gameSupporter.MapX, gameSupporter.MapZ];
-    }
-
-    // 실제로 맵 구현
-    public void CreateMap()
-    {
-        for (int i = 0; i < gameSupporter.MapX * gameSupporter.MapZ; i++)
-        {
-            mapBlockInstList[i].transform.position = new Vector3(i / gameSupporter.MapZ, 0, i % gameSupporter.MapZ);
-            mapBlockInstList[i].SetActive(true);
-        }   
     }
 
     // 실제로 충돌된 값을 확인하여 map2D에 넣어줌
@@ -97,12 +78,6 @@ public class Map : MonoBehaviour
             odbList[i].transform.position = new Vector3(0, -100, 0);
             odbList[i].SetActive(false);
         }
-        miniMap.UpdateMiniMap();
-        //잘 들어갔는지 확인
-        //for (int i = 0; i < gameSupporter.MapX * gameSupporter.MapZ; i++)
-        //{
-        //    print(i / gameSupporter.MapZ + "," + i % gameSupporter.MapZ + ":" + gameSupporter.Map2D[i / gameSupporter.MapZ, i % gameSupporter.MapZ]);
-        //}
     }
     // CheckBox를 생성하여 확인할 준비를 함
     // 해당 함수는 필수적으로 Unity life cycle CollisionXXX 이전에 생성해야함
@@ -114,5 +89,4 @@ public class Map : MonoBehaviour
             odbList[i].SetActive(true);
         }
     }
-    
 }

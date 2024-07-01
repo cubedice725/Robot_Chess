@@ -30,7 +30,9 @@ public class Monster : AStar
         {
             for(int i = 1; i <= MovingDistance; i++)
             {
+                gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.noting;
                 transform.position = new Vector3Int(FinalNodeList[i].x, (int)transform.position.y, FinalNodeList[i].z);
+                gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.moster;
             }
         }
     }

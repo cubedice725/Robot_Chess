@@ -7,13 +7,17 @@ using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 public class Player : MonoBehaviour
 {
-    public List<GameObject> movePlaneInstList;
-    RaycastHit hit;
+    protected List<GameObject> movePlaneInstList = new List<GameObject>();
+    protected GameSupporter gameSupporter;
+
+    private RaycastHit hit;
     public RaycastHit Hit { set{hit = value;} }
 
     // Player가 움직일때 클릭할 판 준비
-    public void SetMovePlane(int movePlaneSetCount)
+    public void SetPlayer(int movePlaneSetCount)
     {
+        gameSupporter = FindObjectOfType<GameSupporter>();
+
         GameObject movePlaneprefab = Resources.Load("Prefab/Move Plane", typeof(GameObject)) as GameObject;
         for (int i = 0; i < movePlaneSetCount; i++)
         {
@@ -26,8 +30,9 @@ public class Player : MonoBehaviour
     // Player가 실제로 움직임
     public void PlayerMove()
     {
-
+        gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.noting;
         transform.position = new Vector3(hit.transform.position.x, 1, hit.transform.position.z);
+        gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.player;
     }
 
     // Player이 선택할수 있는 움직임 판 생성

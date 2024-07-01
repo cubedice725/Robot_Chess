@@ -6,7 +6,8 @@ using UnityEngine;
 
 public class PlayerCamera : MonoBehaviour
 {
-    CinemachineVirtualCamera cam;
+    protected CinemachineVirtualCamera cam;
+
     private float scrollSpeed = 2000.0f;
     private float mouseSpeed = 100f;
     float scrollWheel;
@@ -93,20 +94,9 @@ public class PlayerCamera : MonoBehaviour
         {
             cam.transform.position = new Vector3(cam.transform.position.x, 25, cam.transform.position.z);
         }
-
-        // 진짜 줌인 줌아웃 하지만 외곡이 심해서 제외
-        //cam.m_Lens.FieldOfView += Mathf.FloorToInt(- scrollWheel * Time.deltaTime * scrollSpeed);
-        //
-        //if (cam.m_Lens.FieldOfView <= 10)
-        //{
-        //    cam.m_Lens.FieldOfView = 10;
-        //}
-        //if (cam.m_Lens.FieldOfView >= 100)
-        //{
-        //    cam.m_Lens.FieldOfView = 100;
-        //}
     }
 
+    // 카메라 따라가는거 중지
     private void CamFollowNull()
     {
         if (cam.Follow != null)
