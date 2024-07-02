@@ -17,28 +17,26 @@ public class GameManager : MonoBehaviour
     protected GameSupporter gameSupporter;
 
     private bool MapCheck = true;
-    private bool turnEnd = true;
 
     private void Awake()
     {
         // 필요한 컴포넌트 생성
         map = FindObjectOfType<Map>();
         player = FindObjectOfType<Player>();
-        monster = FindObjectOfType<Monster>();
         miniMap = FindObjectOfType<MiniMap>();
         playerCamera = FindObjectOfType<PlayerCamera>();
         gameSupporter = FindObjectOfType<GameSupporter>();
 
         // 컴포넌트 Set전 필요한 정보 미리 삽입
         miniMap.Wall = 150;
-        miniMap.Monster = 1;
+        miniMap.Monster = 10;
         gameSupporter.MapX = 10;
         gameSupporter.MapZ = 15;
-
+        gameSupporter.TurnStart = false;
+        gameSupporter.TurnEnd = false;
         // 게임에 필요한 Object생성 혹은 설정
         map.SetMap();
         map.SetCheckBox();
-        monster.SetMonster();
         miniMap.SetMiniMap();
         player.SetPlayer(1000);
         playerCamera.SetCamera();
@@ -49,17 +47,23 @@ public class GameManager : MonoBehaviour
         if (MapCheck)
         {
             map.CheckBox();
+            miniMap.UpdateMiniMap();
             MapCheck = false;
         }
-
+        // 한턴이 시작하면 실행
+        if (gameSupporter.TurnStart)
+        {
+            // 여기서 몬스터들이 움직임 연산
+            gameSupporter.TurnStart = false;
+            gameSupporter.TurnEnd = true;
+        }
         // 한턴이 끝나면 실행
-        if (turnEnd)
+        if (gameSupporter.TurnEnd)
         {
             miniMap.UpdateMiniMap();
-            monster.Move();
-            turnEnd = false;
+            gameSupporter.TurnEnd = false;
         }
-        
+
         // ---------------- 마우스 클릭 ----------------
 
         // 왼쪽 마우스 버튼을 눌렀을 때
@@ -77,7 +81,7 @@ public class GameManager : MonoBehaviour
                 {
                     player.Hit = hit;
                     player.PlayerMove();
-                    turnEnd = true;
+                    gameSupporter.TurnStart = true;
                 }
                 if (hit.transform.name == "Player")
                 {

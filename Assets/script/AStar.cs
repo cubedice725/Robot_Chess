@@ -42,7 +42,7 @@ public class AStar : MonoBehaviour
         for (int i = 0; i < sizeX * sizeZ; i++)
         {
             bool isWall = false;
-            if ((int)GameSupporter.map2dObject.wall == gameSupporter.Map2D[i / sizeZ, i % sizeZ])
+            if ((int)GameSupporter.map2dObject.wall == gameSupporter.Map2D[i / sizeZ, i % sizeZ] || (int)GameSupporter.map2dObject.moster == gameSupporter.Map2D[i / sizeZ, i % sizeZ])
             {
                 isWall = true;
             }
