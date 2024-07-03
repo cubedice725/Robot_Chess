@@ -39,7 +39,7 @@ public class Player : MonoBehaviour
     public void ReadyPlayerMove(int radius)
     {
         // 지름 계산
-        int diameter = radius * 2 + 1; 
+        int diameter = radius * 2 + 1;
         for (int i = 0; i < diameter * diameter; i++)
         {
             // 마이너스 좌표를 위한 오차 조정

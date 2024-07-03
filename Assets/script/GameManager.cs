@@ -94,7 +94,6 @@ public class GameManager : MonoBehaviour
         // 오른쪽 마우스 버튼을 눌렀을 때
         if (Input.GetMouseButtonDown(1))
         {
-            monster.Move();
         }
 
         // ---------------- 키보드 ---------------- 

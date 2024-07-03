@@ -3,7 +3,16 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+public class Node
+{
+    public Node ParentNode;
 
+    public bool isWall;
+    // G : 시작으로부터 이동했던 거리, H : |가로|+|세로| 장애물 무시하여 목표까지의 거리, F : G + H
+    public int x, z, G, H;
+    public Node(bool _isWall, int _x, int _z) { isWall = _isWall; x = _x; z = _z; }
+    public int F { get { return G + H; } }
+}
 public class AStar : MonoBehaviour
 {
     protected GameSupporter gameSupporter;
@@ -19,12 +28,12 @@ public class AStar : MonoBehaviour
     protected int sizeX, sizeZ;
     protected Vector3Int bottomLeft, topRight, startPos, targetPos;
 
-    public void SetAStar()
+    protected virtual void Awake()
     {
         gameSupporter = FindObjectOfType<GameSupporter>();
         player = FindObjectOfType<Player>();
     }
-    public void PathFinding()
+    protected void PathFinding()
     {
         bottomLeft = Vector3Int.zero;
 
@@ -64,7 +73,10 @@ public class AStar : MonoBehaviour
             CurNode = OpenList[0];
             for (int i = 1; i < OpenList.Count; i++)
             {
-                if (OpenList[i].F <= CurNode.F && OpenList[i].H < CurNode.H) CurNode = OpenList[i];
+                if (OpenList[i].F <= CurNode.F && OpenList[i].H < CurNode.H)
+                {
+                    CurNode = OpenList[i];
+                }
             }
 
             OpenList.Remove(CurNode);
