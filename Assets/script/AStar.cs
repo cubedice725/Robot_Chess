@@ -4,7 +4,6 @@ using System.Threading;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
-[System.Serializable]
 public class Node
 {
     public Node ParentNode;
@@ -21,9 +20,7 @@ public class AStar : MonoBehaviour
     protected Player player;
     protected Node[,] NodeArray;
     protected Node StartNode, TargetNode, CurNode;
-    [SerializeField]
-    public List<Node> FinalNodeList;
-    [SerializeField]    
+    protected List<Node> FinalNodeList;
     protected List<Node> OpenList, ClosedList;
 
     protected bool allowDiagonal = true;
@@ -36,11 +33,12 @@ public class AStar : MonoBehaviour
         gameSupporter = FindObjectOfType<GameSupporter>();
         player = FindObjectOfType<Player>();
     }
+
     protected virtual void SetPathFinding()
     {
         bottomLeft = Vector3Int.zero;
 
-        topRight = new Vector3Int(gameSupporter.MapX, 0, gameSupporter.MapZ);
+        topRight = new Vector3Int(gameSupporter.MapSizeX, 0, gameSupporter.MapSizeZ);
 
         startPos = new Vector3Int((int)transform.position.x, (int)transform.position.y, (int)transform.position.z);
 

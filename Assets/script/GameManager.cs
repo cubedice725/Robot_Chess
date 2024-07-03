@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -9,34 +10,27 @@ using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
-    protected Map map;
-    protected Player player;
-    protected Monster monster;
-    protected MiniMap miniMap;
-    protected GameSupporter gameSupporter;
-
+    GameSupporter gameSupporter;
+    PlayerMove playerMove;
+    Map map;
+    MiniMap miniMap;
+    MonsterMove monsterMove;
     private bool MapCheck = true;
+    protected RaycastHit hit;
+
+    bool turnStart = false;
+    bool turnEnd = false;
 
     private void Awake()
     {
-        // 필요한 컴포넌트 생성
-        map = FindObjectOfType<Map>();
-        player = FindObjectOfType<Player>();
-        miniMap = FindObjectOfType<MiniMap>();
-        gameSupporter = FindObjectOfType<GameSupporter>();
+        gameSupporter = FindAnyObjectByType<GameSupporter>();
+        playerMove = FindAnyObjectByType<PlayerMove>();
+        miniMap = FindAnyObjectByType<MiniMap>();
+        map = FindAnyObjectByType<Map>();
+        monsterMove = FindAnyObjectByType<MonsterMove>();
 
-        // 컴포넌트 Set전 필요한 정보 미리 삽입
-        miniMap.Wall = 150;
-        miniMap.Monster = 10;
-        gameSupporter.MapX = 10;
-        gameSupporter.MapZ = 15;
-        gameSupporter.TurnStart = false;
-        gameSupporter.TurnEnd = false;
-        // 게임에 필요한 Object생성 혹은 설정
-        map.SetMap();
-        map.SetCheckBox();
-        miniMap.SetMiniMap();
     }
+
     private void Update()
     {
         //맵을 탐색 한번만 작동
@@ -46,15 +40,35 @@ public class GameManager : MonoBehaviour
             miniMap.UpdateMiniMap();
             MapCheck = false;
         }
-
-        // 한턴이 끝나면 실행
-        if (gameSupporter.TurnEnd)
+        if (turnStart)
         {
             miniMap.UpdateMiniMap();
-            gameSupporter.TurnEnd = false;
+            turnStart = false;
+            turnEnd = true;
         }
-
+        if (Input.GetMouseButtonDown(0))
+        {
+            // 메인 카메라를 통해 마우스 클릭한 곳의 ray 정보를 가져옴
+            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out hit, 1000f))
+            {
+                playerMove.Hit = hit;
+                if (hit.transform.name == "Player")
+                {
+                    playerMove.setPlayerPlane();
+                }
+                if (hit.transform.name == "Move Plane")
+                {
+                    playerMove.targetPlayerPlane();
+                    turnStart = true;
+                }
+            }
+        }
+        if (turnEnd)
+        {
+            monsterMove.Move();
+            turnEnd = false;
+        }
     }
-
 }
 

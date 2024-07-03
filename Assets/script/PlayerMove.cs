@@ -12,9 +12,7 @@ public class PlayerMove : AStar
     [SerializeField]
     private int radiusMove = 4;
     protected List<GameObject> movePlaneInstList = new List<GameObject>();
-    protected RaycastHit hit;
-    
-
+    public RaycastHit Hit { get; set; }
     protected override void Awake()
     {
         base.Awake();
@@ -26,56 +24,47 @@ public class PlayerMove : AStar
             movePlaneInstList[i].SetActive(false);
         }
     }
-    protected void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            // 메인 카메라를 통해 마우스 클릭한 곳의 ray 정보를 가져옴
-            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if(Physics.Raycast(ray, out hit, 1000f))
-            {
-                if (hit.transform.name == "Player")
-                {
-                    // 지름 계산
-                    int diameter = radiusMove * 2 + 1;
-                    for (int i = 0; i < diameter * diameter; i++)
-                    {
-                        // 마이너스 좌표를 위한 오차 조정
-                        int width = (i % diameter) - radiusMove;
-                        int length = (i / diameter) - radiusMove;
 
-                        if (width != 0 || length != 0)
-                        {
-                            if (Mathf.FloorToInt(Pythagoras(width, length)) <= radiusMove)
-                            {
-                                movePlaneInstList[i].transform.localPosition = new Vector3(width, -0.49f, length);
-                                movePlaneInstList[i].SetActive(true);
-                            }
-                        }
-                    }
-                }
-                if (hit.transform.name == "Move Plane")
+    public void setPlayerPlane()
+    {
+        // 지름 계산
+        int diameter = radiusMove * 2 + 1;
+        for (int i = 0; i < diameter * diameter; i++)
+        {
+            // 마이너스 좌표를 위한 오차 조정
+            int X = (i % diameter) - radiusMove;
+            int Z = (i / diameter) - radiusMove;
+
+            if (X != 0 || Z != 0)
+            {
+                if (Mathf.FloorToInt(Pythagoras(X, Z)) <= radiusMove)
                 {
-                    PathFinding();
-                    Vector3 positionBeforeMoving = transform.position;
-                    gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.noting;
-                    for (int i = 0; i <= radiusMove; i++)
-                    {
-                        try
-                        {
-                            transform.position = new Vector3((FinalNodeList[i].x - radiusMove) + positionBeforeMoving.x, 1, (FinalNodeList[i].z - radiusMove) + positionBeforeMoving.z);
-                        }
-                        catch { }
-                    }
-                    gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.player;
-                    gameSupporter.TurnStart = true;
+                    movePlaneInstList[i].transform.localPosition = new Vector3(X, -0.49f, Z);
+                    movePlaneInstList[i].SetActive(true);
                 }
             }
         }
     }
+
+    public void targetPlayerPlane()
+    {
+        PathFinding();
+        Vector3 positionBeforeMoving = transform.position;
+        gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.noting;
+        for (int i = 0; i <= radiusMove; i++)
+        {
+            try
+            {
+                transform.position = new Vector3((FinalNodeList[i].x - radiusMove) + positionBeforeMoving.x, 1, (FinalNodeList[i].z - radiusMove) + positionBeforeMoving.z);
+            }
+            catch { }
+        }
+        gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.player;
+    }
+
     protected override void SetPathFinding()
     {
-        Vector3Int adj = new Vector3Int((int)hit.transform.position.x - (int)transform.position.x, 0, (int)hit.transform.position.z - (int)transform.position.z);
+        Vector3Int adj = new Vector3Int((int)Hit.transform.position.x - (int)transform.position.x, 0, (int)Hit.transform.position.z - (int)transform.position.z);
         bottomLeft = Vector3Int.zero;
 
         topRight = new Vector3Int(radiusMove * 2 + 1, 0, radiusMove * 2 + 1);
@@ -117,7 +106,7 @@ public class PlayerMove : AStar
         if (checkX >= bottomLeft.x && checkX < topRight.x && checkZ >= bottomLeft.z && checkZ < topRight.z)
         {
             // 맵을 벗어나지 않고
-            if ((int)transform.position.x + (checkX - radiusMove) < gameSupporter.MapX && (int)transform.position.z + (checkZ - radiusMove) < gameSupporter.MapZ)
+            if ((int)transform.position.x + (checkX - radiusMove) < gameSupporter.MapSizeX && (int)transform.position.z + (checkZ - radiusMove) < gameSupporter.MapSizeZ)
             {
                 if ((int)transform.position.x + (checkX - radiusMove) >= 0 && (int)transform.position.z + (checkZ - radiusMove) >= 0)
                 {

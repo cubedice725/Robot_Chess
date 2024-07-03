@@ -6,8 +6,8 @@ using UnityEngine;
 
 public class MonsterMove : AStar
 {
-    protected int AttackDistance { get; set; }
-    protected int MovingDistance { get; set; }
+    public int AttackDistance { get; set; }
+    public int MovingDistance { get; set; }
 
     protected override void Awake()
     {
@@ -16,16 +16,7 @@ public class MonsterMove : AStar
         MovingDistance = 1;
     }
     
-    private void Update()
-    {
-        if (gameSupporter.TurnStart)
-        {
-            Move();
-            gameSupporter.TurnStart = false;
-            gameSupporter.TurnEnd = true;
-
-        }
-    }
+    
     public void Move()
     {
         gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.noting;
