@@ -13,7 +13,6 @@ public class GameManager : MonoBehaviour
     protected Player player;
     protected Monster monster;
     protected MiniMap miniMap;
-    protected PlayerCamera playerCamera;
     protected GameSupporter gameSupporter;
 
     private bool MapCheck = true;
@@ -24,7 +23,6 @@ public class GameManager : MonoBehaviour
         map = FindObjectOfType<Map>();
         player = FindObjectOfType<Player>();
         miniMap = FindObjectOfType<MiniMap>();
-        playerCamera = FindObjectOfType<PlayerCamera>();
         gameSupporter = FindObjectOfType<GameSupporter>();
 
         // 컴포넌트 Set전 필요한 정보 미리 삽입
@@ -38,8 +36,6 @@ public class GameManager : MonoBehaviour
         map.SetMap();
         map.SetCheckBox();
         miniMap.SetMiniMap();
-        player.SetPlayer(1000);
-        playerCamera.SetCamera();
     }
     private void Update()
     {
@@ -50,13 +46,7 @@ public class GameManager : MonoBehaviour
             miniMap.UpdateMiniMap();
             MapCheck = false;
         }
-        // 한턴이 시작하면 실행
-        if (gameSupporter.TurnStart)
-        {
-            // 여기서 몬스터들이 움직임 연산
-            gameSupporter.TurnStart = false;
-            gameSupporter.TurnEnd = true;
-        }
+
         // 한턴이 끝나면 실행
         if (gameSupporter.TurnEnd)
         {
@@ -64,54 +54,6 @@ public class GameManager : MonoBehaviour
             gameSupporter.TurnEnd = false;
         }
 
-        // ---------------- 마우스 클릭 ----------------
-
-        // 왼쪽 마우스 버튼을 눌렀을 때
-        if (Input.GetMouseButtonDown(0))
-        {
-            RaycastHit hit;
-
-            // 메인 카메라를 통해 마우스 클릭한 곳의 ray 정보를 가져옴
-            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            // ray와 닿은 물체를 확인 후 동작
-            if (Physics.Raycast(ray, out hit, 1000f))
-            {
-                if(hit.transform.name == "Move Plane")
-                {
-                    player.Hit = hit;
-                    player.PlayerMove();
-                    gameSupporter.TurnStart = true;
-                }
-                if (hit.transform.name == "Player")
-                {
-                    player.ReadyPlayerMove(4);
-                }
-                //print(hit.transform.name + hit.transform.position);
-            }
-        }
-        
-        // 오른쪽 마우스 버튼을 눌렀을 때
-        if (Input.GetMouseButtonDown(1))
-        {
-        }
-
-        // ---------------- 키보드 ---------------- 
-        if (Input.GetKeyDown("space"))
-        {
-            playerCamera.PlayerFollow(player.transform);
-        }
-    }
-    private void LateUpdate()
-    {
-        // ---------------- 마우스 위치 ----------------
-        playerCamera.CameraMove();
-
-        // ---------------- 마우스 휠 ----------------
-        if (0f != Input.GetAxis("Mouse ScrollWheel"))
-        {
-            playerCamera.ZoomInOut();
-        }
     }
 
 }

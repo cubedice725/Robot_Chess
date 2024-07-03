@@ -2,23 +2,39 @@ using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
+using UnityEditor.VisionOS;
 using UnityEngine;
 
 public class PlayerCamera : MonoBehaviour
 {
     protected CinemachineVirtualCamera cam;
+    protected Player player;
 
     private float scrollSpeed = 2000.0f;
     private float mouseSpeed = 100f;
     float scrollWheel;
-    public void SetCamera()
+    public void Awake()
     {
         cam = GetComponent<CinemachineVirtualCamera>();
+        player = FindObjectOfType<Player>();
     }
-    // 화면 따라가기
-    public void PlayerFollow(Transform playerT)
+    public void Update()
     {
-        cam.Follow = playerT;
+        // 화면 따라가기
+        if (Input.GetKeyDown("space"))
+        {
+            print(player.transform.position);
+            cam.Follow = player.transform;
+        }
+    }
+    private void LateUpdate()
+    {
+        CameraMove();
+
+        if (0f != Input.GetAxis("Mouse ScrollWheel"))
+        {
+            ZoomInOut();
+        }
     }
     // 카메라 움직임
     public void CameraMove()

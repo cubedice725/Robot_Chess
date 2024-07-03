@@ -21,6 +21,9 @@ public class MonsterMove : AStar
         if (gameSupporter.TurnStart)
         {
             Move();
+            gameSupporter.TurnStart = false;
+            gameSupporter.TurnEnd = true;
+
         }
     }
     public void Move()
@@ -36,13 +39,13 @@ public class MonsterMove : AStar
             for (int i = 1; i <= MovingDistance; i++)
             {
                 transform.position = new Vector3Int(FinalNodeList[i].x, (int)transform.position.y, FinalNodeList[i].z);
-                gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.moster;
             }
         }
         else
         {
             Debug.Log("플레이어를 찾을수 없음");
         }
+        gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.moster;
     }
     public virtual void attack()
     {

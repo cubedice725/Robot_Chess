@@ -1,60 +1,93 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
-using static GameSupporter;
-[System.Serializable]
-public class PlayerNode
+
+public class PlayerMove : AStar
 {
-    public PlayerNode ParentNode;
+    [SerializeField]
+    private int movePlaneSetCount = 1000;
+    [SerializeField]
+    private int radiusMove = 4;
+    protected List<GameObject> movePlaneInstList = new List<GameObject>();
+    protected RaycastHit hit;
+    
 
-    public bool isWall;
-
-    public int x, z, G;
-    public PlayerNode(bool _isWall, int _x, int _z) { isWall = _isWall; x = _x; z = _z; }
-
-}
-
-public class PlayerMove : MonoBehaviour
-{
-    int radiusMove = 4;
-    protected GameSupporter gameSupporter;
-    protected PlayerNode[,] NodeArray;
-    protected PlayerNode StartNode, CurNode;
-    public List<PlayerNode> OpenList, ClosedList;
-    GameObject closePrefab;
-    GameObject OpenPrefab;
-
-    protected bool allowDiagonal = true;
-    protected bool dontCrossCorner = false;
-    protected int sizeX, sizeZ;
-    protected Vector3Int bottomLeft, topRight, startPos;
-    protected void Awake()
+    protected override void Awake()
     {
-        closePrefab = Resources.Load("Prefab/close", typeof(GameObject)) as GameObject;
-        OpenPrefab = Resources.Load("Prefab/Open", typeof(GameObject)) as GameObject;
-        gameSupporter = FindObjectOfType<GameSupporter>();
+        base.Awake();
+        GameObject movePlaneprefab = Resources.Load("Prefab/Move Plane", typeof(GameObject)) as GameObject;
+        for (int i = 0; i < movePlaneSetCount; i++)
+        {
+            movePlaneInstList.Add(Instantiate(movePlaneprefab, transform));
+            movePlaneInstList[i].transform.position = new Vector3(0, -100, 0);
+            movePlaneInstList[i].SetActive(false);
+        }
     }
     protected void Update()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(0))
         {
-            PathFinding();
+            // 메인 카메라를 통해 마우스 클릭한 곳의 ray 정보를 가져옴
+            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if(Physics.Raycast(ray, out hit, 1000f))
+            {
+                if (hit.transform.name == "Player")
+                {
+                    // 지름 계산
+                    int diameter = radiusMove * 2 + 1;
+                    for (int i = 0; i < diameter * diameter; i++)
+                    {
+                        // 마이너스 좌표를 위한 오차 조정
+                        int width = (i % diameter) - radiusMove;
+                        int length = (i / diameter) - radiusMove;
+
+                        if (width != 0 || length != 0)
+                        {
+                            if (Mathf.FloorToInt(Pythagoras(width, length)) <= radiusMove)
+                            {
+                                movePlaneInstList[i].transform.localPosition = new Vector3(width, -0.49f, length);
+                                movePlaneInstList[i].SetActive(true);
+                            }
+                        }
+                    }
+                }
+                if (hit.transform.name == "Move Plane")
+                {
+                    PathFinding();
+                    Vector3 positionBeforeMoving = transform.position;
+                    gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.noting;
+                    for (int i = 0; i <= radiusMove; i++)
+                    {
+                        try
+                        {
+                            transform.position = new Vector3((FinalNodeList[i].x - radiusMove) + positionBeforeMoving.x, 1, (FinalNodeList[i].z - radiusMove) + positionBeforeMoving.z);
+                        }
+                        catch { }
+                    }
+                    gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.player;
+                    gameSupporter.TurnStart = true;
+                }
+            }
         }
     }
-    public void PathFinding()
+    protected override void SetPathFinding()
     {
+        Vector3Int adj = new Vector3Int((int)hit.transform.position.x - (int)transform.position.x, 0, (int)hit.transform.position.z - (int)transform.position.z);
         bottomLeft = Vector3Int.zero;
 
         topRight = new Vector3Int(radiusMove * 2 + 1, 0, radiusMove * 2 + 1);
 
         startPos = new Vector3Int(radiusMove, 0, radiusMove);
 
+        targetPos = new Vector3Int(startPos.x + adj.x, 0, startPos.z + adj.z);
+
         // NodeArray의 크기 정해주고, isWall, x, z 대입
         sizeX = topRight.x - bottomLeft.x;
         sizeZ = topRight.z - bottomLeft.z;
-        NodeArray = new PlayerNode[sizeX, sizeZ];
+        NodeArray = new Node[sizeX, sizeZ];
 
         for (int i = 0; i < sizeX * sizeZ; i++)
         {
@@ -74,97 +107,33 @@ public class PlayerMove : MonoBehaviour
             {
                 isWall = true;
             }
-            NodeArray[i / sizeZ, i % sizeZ] = new PlayerNode(isWall, (i / sizeZ) + bottomLeft.x, (i % sizeZ) + bottomLeft.z);
-        }
-        for (int i = 0; i < sizeX * sizeZ; i++)
-        {
-            PlayerNode node = NodeArray[i / sizeZ, i % sizeZ];
+            NodeArray[i / sizeZ, i % sizeZ] = new Node(isWall, (i / sizeZ) + bottomLeft.x, (i % sizeZ) + bottomLeft.z);
         }
 
-        // 시작과 끝 노드, 열린리스트와 닫힌리스트, 마지막리스트 초기화
-        StartNode = NodeArray[startPos.x - bottomLeft.x, startPos.z - bottomLeft.z];
-
-        OpenList = new List<PlayerNode>() { StartNode };
-        ClosedList = new List<PlayerNode>();
-
-
-        while (OpenList.Count > 0)
-        {
-            // 열린리스트에서 닫힌리스트로 옮기기
-            CurNode = OpenList[0];
-            for (int i = 1; i < OpenList.Count; i++)
-            {
-                CurNode = OpenList[i];
-            }
-
-            OpenList.Remove(CurNode);
-            ClosedList.Add(CurNode);
-            Instantiate(closePrefab, new Vector3(CurNode.x - radiusMove + 1, 1, CurNode.z - radiusMove + 1), Quaternion.Euler(Vector3.zero));
-
-            //// 마지막
-            //if (OpenList.Count == 0)
-            //{
-            //    return;
-            //}
-
-            // ↑ → ↓ ←
-            OpenListAdd(CurNode.x, CurNode.z + 1);
-            OpenListAdd(CurNode.x + 1, CurNode.z);
-            OpenListAdd(CurNode.x, CurNode.z - 1);
-            OpenListAdd(CurNode.x - 1, CurNode.z);
-            // ↗↖↙↘
-            if (allowDiagonal)
-            {
-                OpenListAdd(CurNode.x + 1, CurNode.z + 1);
-                OpenListAdd(CurNode.x - 1, CurNode.z + 1);
-                OpenListAdd(CurNode.x - 1, CurNode.z - 1);
-                OpenListAdd(CurNode.x + 1, CurNode.z - 1);
-            }
-        }
     }
-    protected void OpenListAdd(int checkX, int checkZ)
+    protected override bool OpenListAddCondition(int checkX, int checkZ)
     {
-        // 상하좌우 범위를 벗어나지 않고, 벽이 아니면서, 닫힌리스트에 없다면
-        if (checkX >= bottomLeft.x && checkX < topRight.x && checkZ >= bottomLeft.z && checkZ < topRight.z )
+        // 플레이어가 움직이는 상하좌우 범위를 벗어나지 않고
+        if (checkX >= bottomLeft.x && checkX < topRight.x && checkZ >= bottomLeft.z && checkZ < topRight.z)
         {
-            if (!ClosedList.Contains(NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z]) && !NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z].isWall)
-
+            // 맵을 벗어나지 않고
+            if ((int)transform.position.x + (checkX - radiusMove) < gameSupporter.MapX && (int)transform.position.z + (checkZ - radiusMove) < gameSupporter.MapZ)
             {
-                // 대각선 허용시, 벽 사이로 통과 안됨
-                if (allowDiagonal)
+                if ((int)transform.position.x + (checkX - radiusMove) >= 0 && (int)transform.position.z + (checkZ - radiusMove) >= 0)
                 {
-                    if (NodeArray[CurNode.x - bottomLeft.x, checkZ - bottomLeft.z].isWall && NodeArray[checkX - bottomLeft.x, CurNode.z - bottomLeft.z].isWall)
+                    // 벽이 아니면서, 닫힌리스트에 없다면
+                    if (!NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z].isWall && !ClosedList.Contains(NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z]))
                     {
-                        return;
+                        return true;
                     }
-                }
-
-                // 코너를 가로질러 가지 않을시, 이동 중에 수직수평 장애물이 있으면 안됨
-                if (dontCrossCorner)
-                {
-                    if (NodeArray[CurNode.x - bottomLeft.x, checkZ - bottomLeft.z].isWall || NodeArray[checkX - bottomLeft.x, CurNode.z - bottomLeft.z].isWall)
-                    {
-                        return;
-                    }
-                }
-
-                // 이웃노드에 넣고, 직선은 10, 대각선은 14비용
-                PlayerNode NeighborNode = NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z];
-                int MoveCost = CurNode.G + (CurNode.x - checkX == 0 || CurNode.z - checkZ == 0 ? 10 : 14);
-                if (MoveCost >= radiusMove * 14)
-                {
-                    return;
-                }
-                // 이동비용이 이웃노드G보다 작거나 또는 열린리스트에 이웃노드가 없다면 G, ParentNode를 설정 후 열린리스트에 추가
-                if (MoveCost < NeighborNode.G || !OpenList.Contains(NeighborNode))
-                {
-                    NeighborNode.G = MoveCost;
-                    NeighborNode.ParentNode = CurNode;
-
-                    OpenList.Add(NeighborNode);
-                    Instantiate(OpenPrefab, new Vector3(NeighborNode.x - radiusMove + 1, 1, NeighborNode.z - radiusMove + 1), Quaternion.Euler(Vector3.zero));
                 }
             }
         }
+        return false;
+    }
+
+    private float Pythagoras(int pythA, int pythB)
+    {
+        return Mathf.Sqrt((pythA * pythA) + (pythB * pythB));
     }
 }

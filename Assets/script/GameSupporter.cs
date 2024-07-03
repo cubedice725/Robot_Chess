@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 public class GameSupporter : MonoBehaviour
@@ -17,5 +18,4 @@ public class GameSupporter : MonoBehaviour
     public int MapX { get; set; }
     public int MapZ { get; set; }
     public int[,] Map2D { get; set; }
-
 }
