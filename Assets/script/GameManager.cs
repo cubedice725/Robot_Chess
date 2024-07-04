@@ -59,10 +59,14 @@ public class GameManager : MonoBehaviour
                 }
                 if (hit.transform.name == "Move Plane")
                 {
-                    playerMove.targetPlayerPlane();
+                    playerMove.Move();
                     turnStart = true;
                 }
             }
+        }
+        if (Input.GetMouseButtonDown(1))
+        {
+            turnStart = true;
         }
         if (turnEnd)
         {

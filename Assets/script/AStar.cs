@@ -4,6 +4,7 @@ using System.Threading;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
+[System.Serializable]
 public class Node
 {
     public Node ParentNode;
@@ -20,8 +21,8 @@ public class AStar : MonoBehaviour
     protected Player player;
     protected Node[,] NodeArray;
     protected Node StartNode, TargetNode, CurNode;
-    protected List<Node> FinalNodeList;
-    protected List<Node> OpenList, ClosedList;
+    public List<Node> FinalNodeList;
+    public List<Node> OpenList, ClosedList;
 
     protected bool allowDiagonal = true;
     protected bool dontCrossCorner = false;
@@ -33,17 +34,8 @@ public class AStar : MonoBehaviour
         gameSupporter = FindObjectOfType<GameSupporter>();
         player = FindObjectOfType<Player>();
     }
-
     protected virtual void SetPathFinding()
     {
-        bottomLeft = Vector3Int.zero;
-
-        topRight = new Vector3Int(gameSupporter.MapSizeX, 0, gameSupporter.MapSizeZ);
-
-        startPos = new Vector3Int((int)transform.position.x, (int)transform.position.y, (int)transform.position.z);
-
-        targetPos = new Vector3Int((int)player.transform.position.x, (int)player.transform.position.y, (int)player.transform.position.z);
-
         // NodeArray의 크기 정해주고, isWall, x, z 대입
         sizeX = topRight.x - bottomLeft.x;
         sizeZ = topRight.z - bottomLeft.z;
@@ -58,14 +50,24 @@ public class AStar : MonoBehaviour
             }
             NodeArray[i / sizeZ, i % sizeZ] = new Node(isWall, (i / sizeZ) + bottomLeft.x, (i % sizeZ) + bottomLeft.z);
         }
-    }
 
-    protected void PathFinding()
-    {
-        SetPathFinding();
         // 시작과 끝 노드, 열린리스트와 닫힌리스트, 마지막리스트 초기화
         StartNode = NodeArray[startPos.x - bottomLeft.x, startPos.z - bottomLeft.z];
         TargetNode = NodeArray[targetPos.x - bottomLeft.x, targetPos.z - bottomLeft.z];
+    }
+
+
+    protected void PathFinding(Vector3Int start, Vector3Int target, Vector3Int mapMini, Vector3Int mapMax)
+    {
+        startPos = start;
+        
+        targetPos = target;
+
+        bottomLeft = mapMini;
+
+        topRight = mapMax;
+
+        SetPathFinding();
 
         OpenList = new List<Node>() { StartNode };
         ClosedList = new List<Node>();
@@ -119,26 +121,9 @@ public class AStar : MonoBehaviour
         }
     }
 
-    protected virtual bool OpenListAddCondition(int checkX, int checkZ)
-    {
-        try
-        {
-            // 상하좌우 범위를 벗어나지 않고, 벽이 아니면서, 닫힌리스트에 없다면
-            if (checkX >= bottomLeft.x && checkX < topRight.x && checkZ >= bottomLeft.z && checkZ < topRight.z)
-            {
-                if (!NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z].isWall && !ClosedList.Contains(NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z]))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        catch { return false; }
-        
-    }
     protected void OpenListAdd(int checkX, int checkZ)
     {
-        if (OpenListAddCondition(checkX, checkZ))
+        if (OpenListAddCondition(checkX,checkZ))
         {
             // 대각선 허용시, 벽 사이로 통과 안됨
             if (allowDiagonal)
@@ -172,6 +157,18 @@ public class AStar : MonoBehaviour
                 OpenList.Add(NeighborNode);
             }
         }
+    }
+    protected virtual bool OpenListAddCondition(int checkX, int checkZ)
+    {
+        // 상하좌우 범위를 벗어나지 않고, 벽이 아니면서, 닫힌리스트에 없다면
+        if (checkX >= bottomLeft.x && checkX < topRight.x && checkZ >= bottomLeft.z && checkZ < topRight.z)
+        {
+            if (!NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z].isWall && !ClosedList.Contains(NodeArray[checkX - bottomLeft.x, checkZ - bottomLeft.z]))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
 

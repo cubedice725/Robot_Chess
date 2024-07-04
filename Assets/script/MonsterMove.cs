@@ -20,7 +20,14 @@ public class MonsterMove : AStar
     public void Move()
     {
         gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.noting;
-        PathFinding();
+        
+        PathFinding(
+            new Vector3Int((int)transform.position.x, (int)transform.position.y, (int)transform.position.z),
+            new Vector3Int((int)player.transform.position.x, (int)player.transform.position.y, (int)player.transform.position.z),
+            Vector3Int.zero,
+            new Vector3Int(gameSupporter.MapSizeX, 0, gameSupporter.MapSizeZ)
+            );
+
         if (FinalNodeList.Count < AttackDistance + 3 && FinalNodeList.Count != 0)
         {
             attack();

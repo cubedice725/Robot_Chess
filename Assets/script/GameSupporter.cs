@@ -10,7 +10,7 @@ public class GameSupporter : MonoBehaviour
         noting = 0,
         wall = 1,
         player = 2,
-        moster = 3
+        moster = 3  
     }
     // 생성할 개수
     private int wallPlane = 150;

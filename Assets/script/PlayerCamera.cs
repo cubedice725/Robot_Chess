@@ -23,7 +23,6 @@ public class PlayerCamera : MonoBehaviour
         // 화면 따라가기
         if (Input.GetKeyDown("space"))
         {
-            print(player.transform.position);
             cam.Follow = player.transform;
         }
     }

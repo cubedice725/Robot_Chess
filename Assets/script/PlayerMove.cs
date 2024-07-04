@@ -1,18 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Burst.CompilerServices;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerMove : AStar
 {
-    [SerializeField]
     private int movePlaneSetCount = 1000;
-    [SerializeField]
     private int radiusMove = 4;
-    protected List<GameObject> movePlaneInstList = new List<GameObject>();
+    int movePlaneInstListCount;
+
     public RaycastHit Hit { get; set; }
+    protected List<GameObject> movePlaneInstList = new List<GameObject>();
     protected override void Awake()
     {
         base.Awake();
@@ -24,55 +22,8 @@ public class PlayerMove : AStar
             movePlaneInstList[i].SetActive(false);
         }
     }
-
-    public void setPlayerPlane()
-    {
-        // 지름 계산
-        int diameter = radiusMove * 2 + 1;
-        for (int i = 0; i < diameter * diameter; i++)
-        {
-            // 마이너스 좌표를 위한 오차 조정
-            int X = (i % diameter) - radiusMove;
-            int Z = (i / diameter) - radiusMove;
-
-            if (X != 0 || Z != 0)
-            {
-                if (Mathf.FloorToInt(Pythagoras(X, Z)) <= radiusMove)
-                {
-                    movePlaneInstList[i].transform.localPosition = new Vector3(X, -0.49f, Z);
-                    movePlaneInstList[i].SetActive(true);
-                }
-            }
-        }
-    }
-
-    public void targetPlayerPlane()
-    {
-        PathFinding();
-        Vector3 positionBeforeMoving = transform.position;
-        gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.noting;
-        for (int i = 0; i <= radiusMove; i++)
-        {
-            try
-            {
-                transform.position = new Vector3((FinalNodeList[i].x - radiusMove) + positionBeforeMoving.x, 1, (FinalNodeList[i].z - radiusMove) + positionBeforeMoving.z);
-            }
-            catch { }
-        }
-        gameSupporter.Map2D[(int)transform.position.x, (int)transform.position.z] = (int)GameSupporter.map2dObject.player;
-    }
-
     protected override void SetPathFinding()
     {
-        Vector3Int adj = new Vector3Int((int)Hit.transform.position.x - (int)transform.position.x, 0, (int)Hit.transform.position.z - (int)transform.position.z);
-        bottomLeft = Vector3Int.zero;
-
-        topRight = new Vector3Int(radiusMove * 2 + 1, 0, radiusMove * 2 + 1);
-
-        startPos = new Vector3Int(radiusMove, 0, radiusMove);
-
-        targetPos = new Vector3Int(startPos.x + adj.x, 0, startPos.z + adj.z);
-
         // NodeArray의 크기 정해주고, isWall, x, z 대입
         sizeX = topRight.x - bottomLeft.x;
         sizeZ = topRight.z - bottomLeft.z;
@@ -83,6 +34,7 @@ public class PlayerMove : AStar
             int map2dObject = 0;
             int map2dX = (int)transform.position.x + ((i / (radiusMove * 2 + 1)) - radiusMove);
             int map2dZ = (int)transform.position.z + ((i % (radiusMove * 2 + 1)) - radiusMove);
+
             try
             {
                 map2dObject = gameSupporter.Map2D[map2dX, map2dZ];
@@ -91,14 +43,70 @@ public class PlayerMove : AStar
             {
 
             }
+
             bool isWall = false;
             if ((int)GameSupporter.map2dObject.wall == map2dObject || (int)GameSupporter.map2dObject.moster == map2dObject)
             {
                 isWall = true;
             }
+
             NodeArray[i / sizeZ, i % sizeZ] = new Node(isWall, (i / sizeZ) + bottomLeft.x, (i % sizeZ) + bottomLeft.z);
         }
+    
+        // 시작과 끝 노드, 열린리스트와 닫힌리스트, 마지막리스트 초기화
+        StartNode = NodeArray[startPos.x - bottomLeft.x, startPos.z - bottomLeft.z];
+        TargetNode = NodeArray[targetPos.x - bottomLeft.x, targetPos.z - bottomLeft.z];
+    }
 
+    public void setPlayerPlane()
+    {
+        movePlaneInstListCount = 0;
+        Vector3Int adj = new Vector3Int((int)transform.position.x - radiusMove, 0, (int)transform.position.z - radiusMove);
+        // 지름 계산
+        int diameter = radiusMove * 2 + 1;
+        for (int i = 0; i < diameter * diameter; i++)
+        {
+            int X = (i / diameter);
+            int Z = (i % diameter);
+            try
+            {
+                if (X != radiusMove || Z != radiusMove)
+                {
+                    if (gameSupporter.Map2D[adj.x + X, adj.z + Z] != (int)GameSupporter.map2dObject.wall && gameSupporter.Map2D[adj.x + X, adj.z + Z] != (int)GameSupporter.map2dObject.moster)
+                    {
+                        if (Mathf.FloorToInt(Pythagoras(X - radiusMove, Z - radiusMove)) <= radiusMove)
+                        {
+                            PathFinding(
+                                new Vector3Int(radiusMove, 0, radiusMove),
+                                new Vector3Int(X, 0, Z),
+                                Vector3Int.zero,
+                                new Vector3Int(radiusMove * 2 + 1, 0, radiusMove * 2 + 1)
+                            );
+                            if (FinalNodeList.Count > 1 && FinalNodeList.Count <= radiusMove + 1)
+                            {
+                                movePlaneInstList[movePlaneInstListCount].transform.localPosition = new Vector3(X - radiusMove, -0.49f, Z - radiusMove);
+                                movePlaneInstList[movePlaneInstListCount].SetActive(true);
+
+                                movePlaneInstListCount++;
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+
+        }
+    }
+    public void Move()
+    {
+        transform.position = new Vector3(Hit.transform.position.x, transform.position.y, Hit.transform.position.z);
+
+        for (int i = 0; i < movePlaneInstListCount; i++)
+        {
+            movePlaneInstList[i].transform.position = new Vector3(0, -100, 0);
+            movePlaneInstList[i].SetActive(false);
+        }
     }
     protected override bool OpenListAddCondition(int checkX, int checkZ)
     {
