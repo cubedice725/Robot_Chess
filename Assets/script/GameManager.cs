@@ -53,11 +53,12 @@ public class GameManager : MonoBehaviour
             if (Physics.Raycast(ray, out hit, 1000f))
             {
                 playerMove.Hit = hit;
+                print(hit.transform.name);
                 if (hit.transform.name == "Player")
                 {
                     playerMove.setPlayerPlane();
                 }
-                if (hit.transform.name == "Move Plane")
+                if (hit.transform.name.StartsWith("Move Plane"))
                 {
                     playerMove.Move();
                     turnStart = true;
